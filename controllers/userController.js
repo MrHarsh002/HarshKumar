@@ -1,6 +1,9 @@
 import User from "../models/userModel.js";
+import { sendverificationEmail } from "../service/emailService.js";
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
-export const registerUser = async(res, req) => {
+export const registerUser = async (req, res) => {
     try {
         const {name, email, password} = req.body;
 
@@ -30,16 +33,21 @@ export const registerUser = async(res, req) => {
         });
 
         await newUser.save();
+        
+        await sendverificationEmail(email, name);
+
+        return res.status(201).json({
+            message: "User registered successfully",
+            success: true
+        });
 
     } catch (error) {
-        console.error("Error to register user", error)
-        res.status(500).json({
-            message: "Internal Server Error"
-        })
+        console.error("Error in registerUser:", error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 }
 
-export const verifyUser = async(res, req) => {
+export const verifyUser = async (req, res) => {
     const {code} = req.params;
     const user = await User.findOne({verificationCode: code})
     if(!user){
@@ -60,7 +68,7 @@ export const verifyUser = async(res, req) => {
     })
 }
 
-export const loginUser = async(res, req) => {
+export const loginUser = async (req, res) => {
     try {
         const {email, password} = req.body;
         if(!email || !password){

@@ -8,11 +8,11 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-app.use('/user', userRouter);
+app.use('/api/user', userRouter);
 
-app.use('/',(res, req) => {
-    res.send("All Good")
-});
+app.get('/', (req, res) => {
+    res.send("All Working Fine")
+})
 
 dbConnect();
 
